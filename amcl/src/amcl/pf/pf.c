@@ -362,11 +362,11 @@ void pf_update_resample(pf_t *pf)
   {
     sample_b = set_b->samples + set_b->sample_count++;
 
-    if(drand48() < w_diff)
+/*    if(drand48() < w_diff)
       sample_b->pose = (pf->random_pose_fn)(pf->random_pose_data);
     else
     {
-      // Can't (easily) combine low-variance sampler with KLD adaptive
+*/      // Can't (easily) combine low-variance sampler with KLD adaptive
       // sampling, so we'll take the more traditional route.
       /*
       // Low-variance resampler, taken from Probabilistic Robotics, p110
@@ -391,7 +391,7 @@ void pf_update_resample(pf_t *pf)
       */
 
       // Naive discrete event sampler
-      double r;
+/*      double r;
       r = drand48();
       for(i=0;i<set_a->sample_count;i++)
       {
@@ -407,7 +407,34 @@ void pf_update_resample(pf_t *pf)
       // Add sample to list
       sample_b->pose = sample_a->pose;
     }
+*/
+//--------------------------
+    double r;
+    r = drand48();
+    for(i=0;i<set_a->sample_count;i++)
+    {
+      if((c[i] <= r) && (r < c[i+1]))
+        break;
+    }
+    assert(i<set_a->sample_count);
 
+    sample_a = set_a->samples + i;
+
+    assert(sample_a->weight > 0);
+
+    // Add sample to list
+    sample_b->pose = sample_a->pose;
+
+    if(drand48() < w_diff)
+    {
+      double ang_variance = 0.5 * M_PI;
+      double x_variance = 0.2;
+      double y_variance = 0.2;
+      sample_b->pose.v[0] += drand48()*x_variance - x_variance/2.0;
+      sample_b->pose.v[1] += drand48()*y_variance - y_variance/2.0;
+      sample_b->pose.v[2] += drand48()*ang_variance - ang_variance/2.0; //TODO make variance a parameter
+    }
+//-------------------------------------
     sample_b->weight = 1.0;
     total += sample_b->weight;
 
@@ -658,5 +685,4 @@ int pf_get_cluster_stats(pf_t *pf, int clabel, double *weight,
 
   return 1;
 }
-
 

@@ -999,6 +999,20 @@ AmclNode::uniformPoseGenerator(void* arg)
   return p;
 }
 
+/*/----------------------
+
+pf_vector_t
+AmclNode::biasedPoseGenerator(void* arg)
+{
+  map_t* map = (map_t*)arg;
+  double variance = 0.5 * M_PI  // TODO: make parameter
+  double rot_change = drand48() * variance - variance/2.0;
+
+  return p
+}
+
+//----------------------*/
+
 bool
 AmclNode::globalLocalizationCallback(std_srvs::Empty::Request& req,
                                      std_srvs::Empty::Response& res)
